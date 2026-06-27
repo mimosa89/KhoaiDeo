@@ -1,532 +1,89 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mộng Tím — Editor Đam Mỹ</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Be+Vietnam+Pro:wght@300;400;500&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --lavender-bg:   #F0EBF8;
-    --lavender-soft: #E3D8F5;
-    --lavender-mid:  #C4B0E8;
-    --purple:        #9B7EC8;
-    --purple-deep:   #6B4E9E;
-    --ink:           #3D2B5E;
-    --ink-light:     #7A6490;
-    --white-warm:    #FAF8FF;
-    --petal-1:       #D4C4F0;
-    --petal-2:       #E8D8F8;
-  }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    font-family: 'Be Vietnam Pro', sans-serif;
-    background: var(--lavender-bg);
-    color: var(--ink);
-    font-weight: 300;
-    line-height: 1.7;
-    overflow-x: hidden;
-  }
-
-  /* ── PETALS ── */
-  .petals-canvas {
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none; z-index: 0;
-    overflow: hidden;
-  }
-  .petal {
-    position: absolute; top: -60px;
-    width: 14px; height: 18px;
-    border-radius: 60% 10% 60% 10%;
-    opacity: 0;
-    animation: fall linear infinite;
-  }
-  @keyframes fall {
-    0%   { transform: translateY(0) rotate(0deg) translateX(0); opacity: 0; }
-    5%   { opacity: 0.55; }
-    95%  { opacity: 0.35; }
-    100% { transform: translateY(110vh) rotate(720deg) translateX(60px); opacity: 0; }
-  }
-
-  /* ── NAV ── */
-  nav {
-    position: fixed; top: 0; width: 100%; z-index: 100;
-    background: rgba(240, 235, 248, 0.82);
-    backdrop-filter: blur(14px);
-    border-bottom: 1px solid rgba(196, 176, 232, 0.35);
-    padding: 0 5%;
-    display: flex; align-items: center; justify-content: space-between;
-    height: 62px;
-  }
-  .nav-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.35rem; font-weight: 600;
-    color: var(--purple-deep);
-    letter-spacing: 0.03em;
-    text-decoration: none;
-  }
-  .nav-logo span { font-style: italic; color: var(--purple); }
-  .nav-links { display: flex; gap: 2.4rem; list-style: none; }
-  .nav-links a {
-    text-decoration: none;
-    font-size: 0.88rem; font-weight: 400;
-    color: var(--ink-light);
-    letter-spacing: 0.04em;
-    transition: color 0.25s;
-    position: relative;
-  }
-  .nav-links a::after {
-    content: '';
-    position: absolute; bottom: -4px; left: 0; right: 0;
-    height: 1.5px; background: var(--purple);
-    transform: scaleX(0); transform-origin: left;
-    transition: transform 0.3s ease;
-  }
-  .nav-links a:hover { color: var(--purple-deep); }
-  .nav-links a:hover::after { transform: scaleX(1); }
-
-  /* ── SECTIONS WRAPPER ── */
-  main { position: relative; z-index: 1; }
-
-  /* ── HERO ── */
-  #home {
-    min-height: 100vh;
-    display: flex; align-items: center; justify-content: center;
-    text-align: center;
-    padding: 100px 5% 60px;
-  }
-  .hero-inner { max-width: 700px; }
-  .hero-eyebrow {
-    font-size: 0.78rem; letter-spacing: 0.22em; text-transform: uppercase;
-    color: var(--purple); margin-bottom: 1.4rem;
-  }
-  .hero-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2.6rem, 6vw, 4.2rem);
-    font-weight: 600; line-height: 1.18;
-    color: var(--ink);
-    margin-bottom: 1.6rem;
-  }
-  .hero-title em { font-style: italic; color: var(--purple-deep); }
-  .hero-sub {
-    font-size: 1.02rem; color: var(--ink-light);
-    max-width: 480px; margin: 0 auto 2.8rem;
-    font-weight: 300;
-  }
-  .hero-cta {
-    display: inline-block;
-    padding: 13px 34px;
-    background: linear-gradient(135deg, var(--purple) 0%, var(--purple-deep) 100%);
-    color: #fff; text-decoration: none;
-    border-radius: 40px;
-    font-size: 0.88rem; font-weight: 500; letter-spacing: 0.06em;
-    box-shadow: 0 6px 24px rgba(107,78,158,0.28);
-    transition: transform 0.25s, box-shadow 0.25s;
-  }
-  .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(107,78,158,0.38); }
-
-  .divider {
-    margin: 0 5%;
-    border: none;
-    border-top: 1px solid rgba(196,176,232,0.4);
-  }
-
-  /* ── SECTION SHELL ── */
-  section.block {
-    padding: 90px 5%;
-    max-width: 1200px; margin: 0 auto;
-  }
-  .section-label {
-    font-size: 0.74rem; letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--purple); margin-bottom: 0.6rem;
-  }
-  .section-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(1.9rem, 3.5vw, 2.6rem);
-    font-weight: 600; line-height: 1.25;
-    color: var(--ink); margin-bottom: 1rem;
-  }
-  .section-title em { font-style: italic; color: var(--purple-deep); }
-  .section-body { color: var(--ink-light); font-size: 0.97rem; max-width: 560px; }
-
-  /* ── ABOUT ── */
-  #about .about-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem; align-items: center; margin-top: 3rem;
-  }
-  .about-portrait {
-    aspect-ratio: 3/4;
-    border-radius: 18px 18px 60px 18px;
-    background: linear-gradient(160deg, var(--lavender-soft) 0%, var(--petal-1) 100%);
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden; position: relative;
-  }
-  .about-portrait-inner {
-    font-size: 5rem; user-select: none;
-    filter: drop-shadow(0 4px 12px rgba(107,78,158,0.2));
-  }
-  .about-portrait::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: linear-gradient(180deg, transparent 50%, rgba(107,78,158,0.08) 100%);
-  }
-  .about-text-block { padding: 1rem 0; }
-  .about-chips { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.6rem; }
-  .chip {
-    padding: 5px 14px;
-    border-radius: 30px;
-    border: 1px solid var(--lavender-mid);
-    font-size: 0.8rem; color: var(--purple-deep);
-    background: var(--white-warm);
-  }
-
-  /* ── CARDS ── */
-  .cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1.6rem; margin-top: 2.8rem;
-  }
-  .card {
-    background: var(--white-warm);
-    border-radius: 16px;
-    padding: 1.6rem 1.8rem 1.8rem;
-    border: 1px solid rgba(196,176,232,0.35);
-    box-shadow: 0 2px 16px rgba(107,78,158,0.07);
-    transition: transform 0.28s ease, box-shadow 0.28s ease;
-    position: relative; overflow: hidden;
-    cursor: default;
-  }
-  .card::before {
-    content: '';
-    position: absolute; top: 0; left: 0; right: 0;
-    height: 3.5px;
-    background: linear-gradient(90deg, var(--purple) 0%, var(--lavender-mid) 100%);
-    opacity: 0; transition: opacity 0.3s;
-  }
-  .card:hover { transform: translateY(-5px); box-shadow: 0 10px 36px rgba(107,78,158,0.14); }
-  .card:hover::before { opacity: 1; }
-  .card-genre {
-    font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase;
-    color: var(--purple); margin-bottom: 0.6rem;
-    font-weight: 500;
-  }
-  .card-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.18rem; font-weight: 600;
-    color: var(--ink); margin-bottom: 0.3rem;
-    line-height: 1.3;
-  }
-  .card-author {
-    font-size: 0.8rem; color: var(--ink-light); margin-bottom: 0.9rem;
-  }
-  .card-desc {
-    font-size: 0.88rem; color: var(--ink-light);
-    line-height: 1.65; margin-bottom: 1.2rem;
-    display: -webkit-box; -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical; overflow: hidden;
-  }
-  .card-footer {
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 4px 12px; border-radius: 20px;
-    font-size: 0.75rem; font-weight: 500;
-  }
-  .badge-editing {
-    background: rgba(155,126,200,0.12); color: var(--purple-deep);
-    border: 1px solid rgba(155,126,200,0.3);
-  }
-  .badge-done {
-    background: rgba(100,160,120,0.1); color: #3d7a5a;
-    border: 1px solid rgba(100,160,120,0.3);
-  }
-  .badge-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-  }
-  .badge-editing .badge-dot { background: var(--purple); animation: pulse 1.6s infinite; }
-  .badge-done .badge-dot { background: #3d7a5a; }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; } 50% { opacity: 0.35; }
-  }
-  .card-chap { font-size: 0.78rem; color: var(--ink-light); }
-
-  /* ── STATUS TABS ── */
-  .tabs { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-bottom: 2rem; }
-  .tab {
-    padding: 8px 20px;
-    border-radius: 30px;
-    border: 1.5px solid var(--lavender-mid);
-    font-size: 0.84rem; color: var(--ink-light);
-    background: transparent; cursor: pointer;
-    transition: all 0.22s;
-    font-family: 'Be Vietnam Pro', sans-serif;
-    font-weight: 400;
-  }
-  .tab.active, .tab:hover {
-    background: var(--purple-deep);
-    border-color: var(--purple-deep);
-    color: #fff;
-  }
-
-  /* ── FOOTER ── */
-  footer {
-    text-align: center; padding: 3rem 5%;
-    font-size: 0.82rem; color: var(--ink-light);
-    border-top: 1px solid rgba(196,176,232,0.35);
-    background: var(--white-warm);
-    position: relative; z-index: 1;
-  }
-  footer .footer-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.1rem; color: var(--purple-deep);
-    margin-bottom: 0.5rem; font-style: italic;
-  }
-
-  /* ── SECTION DIVIDER ORNAMENT ── */
-  .ornament {
-    text-align: center; padding: 1rem 0;
-    font-size: 1.1rem; letter-spacing: 0.5em;
-    color: var(--lavender-mid); user-select: none;
-  }
-
-  @media (max-width: 680px) {
-    #about .about-grid { grid-template-columns: 1fr; }
-    .about-portrait { aspect-ratio: 1/1; max-width: 260px; margin: 0 auto; }
-    nav { padding: 0 4%; }
-    .nav-links { gap: 1.4rem; }
-    .nav-links a { font-size: 0.82rem; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .petal { animation: none; }
-    .card { transition: none; }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Long Hành Khóa ✦ Khoai Dẻo</title>
+  <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 <body>
 
-<!-- Petals -->
 <div class="petals-canvas" id="petals"></div>
 
-<!-- Nav -->
 <nav>
-  <a class="nav-logo" href="#home">Mộng <span>Tím</span></a>
+  <a href="../../index.html" class="nav-logo">Khoai <em>Dẻo</em></a>
+  <button class="nav-toggle" aria-label="Menu">☰</button>
   <ul class="nav-links">
-    <li><a href="#home">Trang chủ</a></li>
-    <li><a href="#about">Giới thiệu</a></li>
-    <li><a href="#editing">Đang edit</a></li>
-    <li><a href="#done">Đã hoàn</a></li>
+    <li><a href="../../index.html">trang chủ</a></li>
+    <li><a href="../../index.html#dang-edit" class="active">đang edit</a></li>
+    <li><a href="../../index.html#da-hoan">đã hoàn</a></li>
   </ul>
 </nav>
 
-<main>
-  <!-- HERO -->
-  <section id="home" style="padding-top:100px;">
-    <div class="hero-inner">
-      <p class="hero-eyebrow">✦ Editor Tiểu thuyết Đam Mỹ ✦</p>
-      <h1 class="hero-title">Nơi những câu chuyện<br><em>được chắp cánh</em></h1>
-      <p class="hero-sub">Chào mừng bạn đến với góc nhỏ của mình — nơi lưu giữ những bản edit chỉn chu và những trái tim đã đập cùng nhân vật.</p>
-      <a href="#about" class="hero-cta">Khám phá →</a>
+<div class="page-wrap">
+
+  <div class="breadcrumb">
+    <a href="../../index.html">trang chủ</a>
+    <span>›</span> đang edit
+    <span>›</span> Long Hành Khóa
+  </div>
+
+  <!-- NOVEL HEADER -->
+  <div class="novel-header-wrap">
+    <div class="novel-header-cover">
+      <!-- ✏️ ĐỂ THÊM ẢNH BÌA: xóa div dưới, thay bằng <img src="../../assets/img/long-hanh-khoa.jpg" alt="Long Hành Khóa"> -->
+      <div class="novel-header-cover-ph">✦</div>
     </div>
-  </section>
-
-  <hr class="divider">
-
-  <!-- ABOUT -->
-  <section id="about" class="block">
-    <p class="section-label">✦ Giới thiệu</p>
-    <h2 class="section-title">Một chút về<br><em>mình và hành trình này</em></h2>
-
-    <div class="about-grid">
-      <div class="about-portrait">
-        <span class="about-portrait-inner">🌸</span>
+    <div class="novel-header-info">
+      <h1>Long Hành Khóa</h1>
+      <p class="meta">
+        Tác giả: <!-- ✏️ Tên tác giả --> &nbsp;·&nbsp;
+        Editor: Khoai Dẻo &nbsp;·&nbsp;
+        <span class="badge badge-editing" style="vertical-align:middle;"><span class="badge-dot"></span>Đang edit</span>
+      </p>
+      <div class="tags">
+        <!-- ✏️ Thêm/xóa tag -->
+        <span class="tag">đam mỹ</span>
+        <span class="tag">HE</span>
       </div>
-
-      <div class="about-text-block">
-        <p class="section-body" style="max-width:100%; margin-bottom:1.2rem;">
-          Mình là một editor tự do, yêu thích thể loại đam mỹ từ những ngày còn lén đọc truyện dưới bàn. Với mình, edit không chỉ là sửa lỗi — đó là cách mình đồng hành cùng câu chuyện, giúp mỗi cung bậc cảm xúc được truyền tải trọn vẹn nhất đến bạn đọc.
-        </p>
-        <p class="section-body" style="max-width:100%; margin-bottom:1.6rem;">
-          Mình làm việc tỉ mỉ, chú trọng từng câu từng chữ để giữ hơi văn gốc nhưng vẫn đảm bảo sự mượt mà, dễ đọc cho độc giả Việt.
-        </p>
-        <div class="about-chips">
-          <span class="chip">✿ Đam mỹ cổ đại</span>
-          <span class="chip">✿ Hiện đại</span>
-          <span class="chip">✿ Huyền huyễn</span>
-          <span class="chip">✿ Ngọt ngào HE</span>
-          <span class="chip">✿ BE / Khổ nước mắt</span>
-        </div>
-      </div>
+      <p class="novel-synopsis">
+        <!-- ✏️ Tóm tắt truyện -->
+        Tóm tắt truyện...
+      </p>
     </div>
-  </section>
+  </div>
 
-  <div class="ornament">· · ✦ · ·</div>
+  <!-- CHAPTER LIST -->
+  <div class="chapter-wrap">
+    <h2 class="chapter-list-title">✦ Danh sách chương</h2>
 
-  <!-- EDITING -->
-  <section id="editing" class="block">
-    <p class="section-label">✦ Đang edit</p>
-    <h2 class="section-title">Đang trên bàn<br><em>chờ bạn cùng đọc</em></h2>
-    <p class="section-body" style="margin-bottom:0;">Những bộ mình đang cặm cụi với từng chương — cập nhật thường xuyên.</p>
+    <!--
+    ════════════════════════════════════════════
+    HƯỚNG DẪN THÊM CHƯƠNG:
+    1. Copy 1 dòng <a class="chapter-item"> bên dưới
+    2. Đổi href="chuong-XX.html" và số chương + tên chương
+    3. Tạo file chương mới: copy chuong-01.html → chuong-02.html
+    4. Điền nội dung vào file mới
+    ════════════════════════════════════════════
+    -->
 
-    <div class="cards-grid" id="editing-cards">
+    <a href="chuong-01.html" class="chapter-item">
+      <span class="chapter-num">Chương 1</span>
+      <span class="chapter-name"><!-- ✏️ Tên chương 1 (có thể để trống) --></span>
+      <span class="chapter-arrow">›</span>
+    </a>
 
-      <div class="card">
-        <p class="card-genre">Cổ đại · Kiếm hiệp</p>
-        <h3 class="card-title">Thương Lan Quyết</h3>
-        <p class="card-author">Tác giả: Mặc Hướng Trầm</p>
-        <p class="card-desc">Một bộ chuyên về tình yêu bi kịch giữa hai kiếm sĩ danh chấn thiên hạ. Tình tiết ngọt lịm nhưng đau tận xương.</p>
-        <div class="card-footer">
-          <span class="badge badge-editing"><span class="badge-dot"></span>Đang edit</span>
-          <span class="card-chap">Chương 1–48 / 120</span>
-        </div>
-      </div>
+    <!-- Thêm chương mới vào đây ↓ -->
 
-      <div class="card">
-        <p class="card-genre">Hiện đại · Học đường</p>
-        <h3 class="card-title">Anh Ấy Của Tôi</h3>
-        <p class="card-author">Tác giả: Lâm Tiểu Ngư</p>
-        <p class="card-desc">Chuyện tình ngọt ngào xen lẫn hiểu lầm, oan ức của hai chàng trai từ thời trung học đến khi trưởng thành.</p>
-        <div class="card-footer">
-          <span class="badge badge-editing"><span class="badge-dot"></span>Đang edit</span>
-          <span class="card-chap">Chương 1–21 / 80</span>
-        </div>
-      </div>
+  </div>
 
-      <div class="card">
-        <p class="card-genre">Huyền huyễn · Tu tiên</p>
-        <h3 class="card-title">Phù Dao Luyến Ca</h3>
-        <p class="card-author">Tác giả: Vân Tịch</p>
-        <p class="card-desc">Tiên lão thần tiên gặp gỡ đệ tử tinh nghịch, một hành trình dài từ sư đồ đến linh hồn đồng điệu.</p>
-        <div class="card-footer">
-          <span class="badge badge-editing"><span class="badge-dot"></span>Đang edit</span>
-          <span class="card-chap">Chương 1–10 / 200</span>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <hr class="divider">
-
-  <!-- DONE -->
-  <section id="done" class="block">
-    <p class="section-label">✦ Đã hoàn thành</p>
-    <h2 class="section-title">Những bộ đã<br><em>về tới bến</em></h2>
-    <p class="section-body" style="margin-bottom:0;">Hoàn chỉnh từng chữ, sẵn sàng để bạn đọc một mạch.</p>
-
-    <div class="cards-grid" id="done-cards">
-
-      <div class="card">
-        <p class="card-genre">Cổ đại · Cung đình</p>
-        <h3 class="card-title">Thiên Quan Tứ Phúc</h3>
-        <p class="card-author">Tác giả: Mặc Hướng Trầm</p>
-        <p class="card-desc">Thái tử bị đày xuống trần gian, trải qua vạn kiếp mới nhận ra người ở bên mình mãi là nhất.</p>
-        <div class="card-footer">
-          <span class="badge badge-done"><span class="badge-dot"></span>Hoàn thành</span>
-          <span class="card-chap">244 chương + ngoại truyện</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <p class="card-genre">Hiện đại · Giải trí</p>
-        <h3 class="card-title">Em Là Ánh Sáng Của Anh</h3>
-        <p class="card-author">Tác giả: Diệp Thanh</p>
-        <p class="card-desc">Idol nổi tiếng gặp fan cuồng nhiệt, tình yêu nảy sinh từ những buổi gặp gỡ ngẫu nhiên đáng yêu.</p>
-        <div class="card-footer">
-          <span class="badge badge-done"><span class="badge-dot"></span>Hoàn thành</span>
-          <span class="card-chap">96 chương</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <p class="card-genre">Huyền huyễn · BE</p>
-        <h3 class="card-title">Nguyệt Hạ Vô Nhân</h3>
-        <p class="card-author">Tác giả: Tiếu Hoa Tàn</p>
-        <p class="card-desc">Mình đã khóc ba lần lúc edit bộ này. Bi kịch thuần túy — đẹp đến đau lòng. Không dành cho người yếu tim.</p>
-        <div class="card-footer">
-          <span class="badge badge-done"><span class="badge-dot"></span>Hoàn thành</span>
-          <span class="card-chap">150 chương</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <p class="card-genre">Cổ đại · Ngọt ngào</p>
-        <h3 class="card-title">Xuân Phong Thập Lý</h3>
-        <p class="card-author">Tác giả: Bạch Lộc Thành Sương</p>
-        <p class="card-desc">Tướng quân x thư sinh, ngọt lịm từ đầu đến cuối. Bộ này mình edit mà cứ mỉm cười hoài không dứt được.</p>
-        <div class="card-footer">
-          <span class="badge badge-done"><span class="badge-dot"></span>Hoàn thành</span>
-          <span class="card-chap">108 chương</span>
-        </div>
-      </div>
-
-    </div>
-  </section>
-</main>
+</div>
 
 <footer>
-  <p class="footer-logo">Mộng Tím</p>
-  <p>Edit với tình yêu — từng chữ một · © 2025</p>
-  <p style="margin-top:0.5rem; font-size:0.76rem; opacity:0.6;">Tất cả bản quyền truyện thuộc về tác giả gốc · Mình chỉ là người dịch và chỉnh sửa</p>
+  <p class="footer-logo">Khoai Dẻo</p>
+  <p>Edit với tình yêu — từng chữ một ♡</p>
 </footer>
 
-<script>
-  /* ── Petals ── */
-  const canvas = document.getElementById('petals');
-  const colors = ['#D4C4F0','#E8D8F8','#C4B0E8','#F0EBF8','#B89ED8'];
-  for (let i = 0; i < 22; i++) {
-    const p = document.createElement('div');
-    p.className = 'petal';
-    const size = 10 + Math.random() * 10;
-    p.style.cssText = `
-      left: ${Math.random() * 100}%;
-      width: ${size}px; height: ${size * 1.25}px;
-      background: ${colors[Math.floor(Math.random() * colors.length)]};
-      animation-duration: ${9 + Math.random() * 12}s;
-      animation-delay: ${-Math.random() * 15}s;
-      transform: rotate(${Math.random() * 360}deg);
-    `;
-    canvas.appendChild(p);
-  }
-
-  /* ── Active nav on scroll ── */
-  const sections = document.querySelectorAll('[id]');
-  const navLinks = document.querySelectorAll('.nav-links a');
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        navLinks.forEach(l => l.style.color = '');
-        const active = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
-        if (active) active.style.color = 'var(--purple-deep)';
-      }
-    });
-  }, { threshold: 0.4 });
-  sections.forEach(s => observer.observe(s));
-
-  /* ── Fade-in on scroll ── */
-  const fadeEls = document.querySelectorAll('.card, .about-grid, .hero-inner');
-  const fadeObs = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.style.opacity = '1';
-        e.target.style.transform = 'translateY(0)';
-        fadeObs.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.1 });
-  fadeEls.forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(18px)';
-    el.style.transition = 'opacity 0.55s ease, transform 0.55s ease';
-    fadeObs.observe(el);
-  });
-</script>
+<script src="../../assets/js/main.js"></script>
 </body>
 </html>
